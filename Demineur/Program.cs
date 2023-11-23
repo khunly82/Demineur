@@ -6,6 +6,8 @@
         static int nbLignes;
         static int nbBombes;
         static Case[,] champDeMines = null!;
+        static int cursorX = 0;
+        static int cursorY = 0;
 
         static void Main(string[] args)
         {
@@ -14,18 +16,82 @@
             nbBombes = DemanderUnNombre("Nombre de bombes");
             champDeMines = new Case [nbCols, nbLignes];
             AjouterBombes();
-
-
             while (true)
             {
                 AfficherGrille();
-                Console.WriteLine();
-                int x = DemanderUnNombre("x ?");
-                int y = DemanderUnNombre("y ?");
+                (int x, int y) = ChoisirCase();
                 DecouvrirCase(x, y);
+                if (champDeMines[x, y].Valeur == 9)
+                {
+                    AfficherGrille();
+                    Console.SetCursorPosition(0, nbLignes + 3);
+                    Console.WriteLine("Vous avez perdu !!");
+                    break;
+                }
+                if (CheckVictory())
+                {
+                    AfficherGrille();
+                    Console.SetCursorPosition(0, nbLignes + 3);
+                    Console.WriteLine("Vous avez gagné !!");
+                    break;
+                }
             }
+        }
 
-            // Console.WriteLine((nbCols, nbLignes, nbBombes));
+        private static bool CheckVictory()
+        {
+            for (int x = 0; x < nbCols; x++)
+            {
+                for(int y = 0; y < nbLignes; y++)
+                {
+                    if (!champDeMines[x, y].Visible && champDeMines[x, y].Valeur != 9)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        private static (int,int) ChoisirCase()
+        {
+            ConsoleKey consoleKey = default;
+            while(consoleKey != ConsoleKey.Enter)
+            {
+                Console.SetCursorPosition(cursorX, cursorY);
+                Console.BackgroundColor = ConsoleColor.DarkGray;
+                Console.Write(
+                    champDeMines[cursorX, cursorY].Visible ?
+                    champDeMines[cursorX, cursorY].Valeur : 
+                    "■"
+                );
+                Console.ResetColor();
+
+                consoleKey = Console.ReadKey(true).Key;
+
+                Console.SetCursorPosition(cursorX, cursorY);
+                Console.Write(
+                    champDeMines[cursorX, cursorY].Visible ?
+                    champDeMines[cursorX, cursorY].Valeur :
+                    "■"
+                );
+                switch (consoleKey)
+                {
+                    case ConsoleKey.LeftArrow:
+                        cursorX = (cursorX - 1 + nbCols) % nbCols;
+                        break;
+                    case ConsoleKey.RightArrow:
+                        cursorX = (cursorX + 1) % nbCols;
+                        break;
+                    case ConsoleKey.UpArrow:
+                        cursorY = (cursorY - 1 + nbLignes) % nbLignes;
+                        break;
+                    case ConsoleKey.DownArrow:
+                        cursorY = (cursorY + 1) % nbLignes;
+                        break;
+                }
+            }
+            return (cursorX, cursorY);
         }
 
         private static void DecouvrirCase(int x, int y)
@@ -45,16 +111,6 @@
         {
             for (int i = 0; i < nbBombes; i++)
             {
-                //int x = new Random().Next(0, nbCols);
-                //int y = new Random().Next(0, nbLignes);
-                //if (champDeMines[x, y] == 9)
-                //{
-                //    i--;
-                //}
-                //else
-                //{
-                //    AjouterBombe(x, y);
-                //}
                 int x, y;
                 do
                 {
@@ -76,16 +132,6 @@
                     champDeMines[newX, newY].Valeur++;
                 }
             });
-
-            //champDeMines[x - 1, y - 1]++;
-            //champDeMines[x - 1, y + 0]++;
-            //champDeMines[x - 1, y + 1]++;
-            //champDeMines[x + 0, y - 1]++;
-            //champDeMines[x + 0, y + 0]++;
-            //champDeMines[x + 0, y + 1]++;
-            //champDeMines[x + 1, y - 1]++;
-            //champDeMines[x + 1, y + 0]++;
-            //champDeMines[x + 1, y + 1]++;
         }
 
         private static void AfficherGrille()
